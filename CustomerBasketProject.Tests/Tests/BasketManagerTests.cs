@@ -40,8 +40,8 @@ namespace CustomerBasketProject.Tests.Tests
             IBasketManager basketManager = Setup(initialBasket);
             var resultBasket = basketManager.AddItemToBasket(ProductAssets.exampleProductBagOfPogs);
 
-            Assert.Greater(resultBasket.BasketContent.Count, initialBasket.BasketContent.Count);
-            Assert.Greater(resultBasket.BasketContent[0].Quantity, initialBasket.BasketContent[0].Quantity);
+            int expectedQuantity = 2;
+            Assert.AreEqual(resultBasket.BasketContent[0].Quantity, expectedQuantity);
         }
 
         [Test]

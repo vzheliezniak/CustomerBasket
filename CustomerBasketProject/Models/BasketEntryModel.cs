@@ -8,5 +8,7 @@ namespace CustomerBasketProject.Models
     {
         public ProductModel Product { get; set; }
         public int Quantity { get; set; }
+
+        public decimal SubTotal { get; set; }
     }
 }

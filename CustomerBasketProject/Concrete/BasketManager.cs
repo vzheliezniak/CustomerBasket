@@ -3,6 +3,7 @@ using CustomerBasketProject.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace CustomerBasketProject.Concrete
 {
@@ -16,7 +17,31 @@ namespace CustomerBasketProject.Concrete
 
         public BasketModel AddItemToBasket(ProductModel product)
         {
-            throw new NotImplementedException();
+            if(product == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var currentBasket = _basketContainer.GetCustomerBasket();
+            var existingItemInBasket = currentBasket.BasketContent.Find(x => x.Product.Id == product.Id);
+            
+            if(existingItemInBasket == null)
+            {
+                var newBasketEntry = new BasketEntryModel { Product = product, Quantity = 1, SubTotal = product.CostPerUnit };
+                currentBasket.BasketContent.Add(newBasketEntry);
+            }
+            else
+            {
+                existingItemInBasket.Quantity++;
+                existingItemInBasket.SubTotal += product.CostPerUnit;
+            }
+
+            currentBasket.SubBasketPrice = GetSubBasketPrice();
+            //apply discounts
+            //calculate grand total price
+            //currentBasket.GrandTotalPrice = GetGrandTotalPrice();
+
+            return currentBasket;
         }
 
         public string Display()
@@ -26,22 +51,68 @@ namespace CustomerBasketProject.Concrete
 
         public BasketModel EmptyBasket()
         {
-            throw new NotImplementedException();
+            var currentBasket = _basketContainer.GetCustomerBasket();
+            currentBasket.BasketContent.Clear();
+            currentBasket.GrandTotalPrice = 0.0m;
+            currentBasket.SubBasketPrice = 0.0m;
+            return currentBasket;
         }
 
         public BasketModel Remove(string productId, bool shouldRemoveAllItems)
         {
-            throw new NotImplementedException();
+            var currentBasket = _basketContainer.GetCustomerBasket();
+            var existingItemInBasket = currentBasket.BasketContent.Find(x => x.Product.Id == productId);
+            if(existingItemInBasket == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            var updatedQuantity = existingItemInBasket.Quantity - 1;
+
+            if(shouldRemoveAllItems || updatedQuantity == 0)
+            {
+                currentBasket.BasketContent.Remove(existingItemInBasket);
+            }
+            else
+            {
+                existingItemInBasket.Quantity--;
+                existingItemInBasket.SubTotal = GetSubPrice(productId); 
+            }
+
+            currentBasket.SubBasketPrice = GetSubBasketPrice();
+            //apply discounts
+            //calculate grand total price
+            //currentBasket.GrandTotalPrice = GetGrandTotalPrice();
+
+            return currentBasket;
+
         }
 
         public decimal GetSubPrice(string productId)
         {
-            throw new NotImplementedException();
+            var currentBasket = _basketContainer.GetCustomerBasket();
+            var basketEntry = currentBasket.BasketContent.Find(x => x.Product.Id == productId);
+            if(basketEntry == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return basketEntry.Product.CostPerUnit * basketEntry.Quantity;
         }
 
         public decimal GetSubBasketPrice()
         {
-            throw new NotImplementedException();
+            var currentBasket = _basketContainer.GetCustomerBasket();
+            var res = currentBasket.BasketContent.Sum(x => x.SubTotal);
+            return res;
+
+            //var subBasketPrice = 0.0m;
+            //foreach(var entry in currentBasket.BasketContent)
+            //{
+            //    subBasketPrice += entry.SubTotal;
+            //}
+
+            //return subBasketPrice;
         }
 
         public decimal GetGrandTotalPrice()
