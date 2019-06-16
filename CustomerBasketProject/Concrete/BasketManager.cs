@@ -8,10 +8,45 @@ namespace CustomerBasketProject.Concrete
 {
     public class BasketManager: IBasketManager
     {
-        private BasketModel _customerBasket;
-        public BasketManager(BasketModel basket)
+        private readonly IBasketContainer _basketContainer;
+        public BasketManager(IBasketContainer basketContainer)
         {
-            _customerBasket = basket;
+            _basketContainer = basketContainer;
+        }
+
+        public BasketModel AddItemToBasket(ProductModel product)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Display()
+        {
+            throw new NotImplementedException();
+        }
+
+        public BasketModel EmptyBasket()
+        {
+            throw new NotImplementedException();
+        }
+
+        public BasketModel Remove(string productId, bool shouldRemoveAllItems)
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal GetSubPrice(string productId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal GetSubBasketPrice()
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal GetGrandTotalPrice()
+        {
+            throw new NotImplementedException();
         }
     }
 }

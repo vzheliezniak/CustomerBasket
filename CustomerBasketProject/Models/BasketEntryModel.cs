@@ -7,6 +7,6 @@ namespace CustomerBasketProject.Models
     public class BasketEntryModel
     {
         public ProductModel Product { get; set; }
-        public int Quintity { get; set; }
+        public int Quantity { get; set; }
     }
 }
