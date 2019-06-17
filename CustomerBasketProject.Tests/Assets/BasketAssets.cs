@@ -13,7 +13,7 @@ namespace CustomerBasketProject.Tests.Assets
         {
             BasketContent = new List<BasketEntryModel>
             {
-                new BasketEntryModel{ Product = ProductAssets.exampleProductBagOfPogs, Quantity = 1}, 
+                new BasketEntryModel{ Product = ProductAssets.exampleProductBagOfPogs, Quantity = 2}, 
                 new BasketEntryModel{ Product = ProductAssets.exampleProductShuriken, Quantity = 3}
             }
         };

@@ -64,7 +64,7 @@ namespace CustomerBasketProject.Concrete
             var existingItemInBasket = currentBasket.BasketContent.Find(x => x.Product.Id == productId);
             if(existingItemInBasket == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentException();
             }
 
             var updatedQuantity = existingItemInBasket.Quantity - 1;

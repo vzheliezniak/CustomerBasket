@@ -14,20 +14,17 @@ namespace CustomerBasketProject.Tests.Tests
     [TestFixture]
     public class BasketManagerTests
     {
-        Mock<IBasketContainer> customerBasket = new Mock<IBasketContainer>();
-
         [Test]
         public void AddItemToBasket_NullItemPassed_ArgumentNullExceptionIsThrown()
         {
-            customerBasket.Setup(x => x.GetCustomerBasket()).Returns(BasketAssets.exampleEmptyBasket);
-            IBasketManager basketManager = new BasketManager(customerBasket.Object);
+            IBasketManager basketManager = SetupEmptyBasket();
             Assert.Throws<ArgumentNullException>(() => { basketManager.AddItemToBasket(null); });
         }
 
         [Test]
         public void AddItemToBasket_ItemIsAddedToEmptyBasket_BasketHasOneItem()
-        {            
-            IBasketManager basketManager = Setup(BasketAssets.exampleEmptyBasket);
+        {
+            IBasketManager basketManager = SetupEmptyBasket();
             var resultBasket = basketManager.AddItemToBasket(ProductAssets.exampleProductShuriken);
 
             Assert.AreEqual(resultBasket.BasketContent.Count, 1);
@@ -36,29 +33,28 @@ namespace CustomerBasketProject.Tests.Tests
         [Test]
         public void AddItemToBasket_ItemsIsAddedToBasketWithProducts_QuantityIncreased()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
+            int expectedQuantity = initialBasket.BasketContent[0].Quantity + 1;
             var resultBasket = basketManager.AddItemToBasket(ProductAssets.exampleProductBagOfPogs);
-
-            int expectedQuantity = 2;
+            
             Assert.AreEqual(resultBasket.BasketContent[0].Quantity, expectedQuantity);
         }
 
         [Test]
         public void RemoveItem_BasketIsEmpty_NothingChanges()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            IBasketManager basketManager = SetupEmptyBasket();
 
             var result = basketManager.Remove(ProductAssets.exampleProductBagOfPogs.Id, true);
-            Assert.AreSame(result, initialBasket);
+            Assert.IsEmpty(result.BasketContent);
         } 
 
         [Test]
         public void RemoveItem_ItemDoesNotExistInBusket_ArgumentExceptionIsThrown()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
 
             Assert.Throws<ArgumentException>(() => {
                 basketManager.Remove(ProductAssets.exampleProductPaperMask.Id, false);
@@ -68,30 +64,31 @@ namespace CustomerBasketProject.Tests.Tests
         [Test]
         public void RemoveItem_ItemExistsInBusket_QuantityDescreased()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
-
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
+            var initialProductQuantity = initialBasket.BasketContent[1].Quantity;
             var result = basketManager.Remove(ProductAssets.exampleProductShuriken.Id, false);
 
-            Assert.Less(result.BasketContent[1].Quantity, initialBasket.BasketContent[1].Quantity);
+            Assert.Less(result.BasketContent[1].Quantity, initialProductQuantity);
         }
 
         [Test]
         public void RemoveWholeSet_ItemExists_WholeSetOfItemsIsRemoved()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
 
-            var result = basketManager.Remove(ProductAssets.exampleProductShuriken.Id, true);
+            var testProduct = ProductAssets.exampleProductBagOfPogs;
 
-            Assert.IsEmpty(result.BasketContent.Where(x => x.Product.Id == ProductAssets.exampleProductShuriken.Id));
+            var result = basketManager.Remove(testProduct.Id, true);
+
+            Assert.IsEmpty(result.BasketContent.Where(x => x.Product.Id == testProduct.Id));
         }
 
         [Test]
         public void EmptyBusket_EmptyBusketIsReturned()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            IBasketManager basketManager = SetupEmptyBasket();
 
             var result = basketManager.EmptyBasket();
 
@@ -101,8 +98,8 @@ namespace CustomerBasketProject.Tests.Tests
         [Test]
         public void GetSubTotalOfItems_ItemDoesNotExistInBusket_ArgumentExceptionIsThrown()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
 
             Assert.Throws<ArgumentException>(() => { basketManager.GetSubPrice(ProductAssets.exampleProductPaperMask.Id); });
         }
@@ -110,8 +107,8 @@ namespace CustomerBasketProject.Tests.Tests
         [Test]
         public void GetSubTotalOfItems_ItemsExists_SubPriceReturned()
         {
-            var initialBasket = BasketAssets.exampleBasketWithContent;
-            IBasketManager basketManager = Setup(initialBasket);
+            var initialBasket = new BasketModel();
+            var basketManager = SetupBasketWithProducts(initialBasket);
 
             var subShurikensPrice = basketManager.GetSubPrice(ProductAssets.exampleProductShuriken.Id);
 
@@ -121,16 +118,35 @@ namespace CustomerBasketProject.Tests.Tests
         [Test]
         public void GetSubTotalOfTheBasket_BasketIsEmpty_ZeroPriceIsReturned()
         {
-            var initialBasket = BasketAssets.exampleEmptyBasket;
-            IBasketManager basketManager = Setup(initialBasket);
+            IBasketManager basketManager = SetupEmptyBasket();
 
             var subBasketPrice = basketManager.GetSubBasketPrice();
             Assert.AreEqual(subBasketPrice, 0.0m);
         }
 
-        private IBasketManager Setup(BasketModel basket)
+        private IBasketManager SetupEmptyBasket()
         {
-            customerBasket.Setup(x => x.GetCustomerBasket()).Returns(basket);
+            //mock empty basket model
+            BasketModel basketModel = new BasketModel { BasketContent = new List<BasketEntryModel>() };
+            
+            //mock BasketContainer service
+            Mock<IBasketContainer> customerBasket = new Mock<IBasketContainer>();
+            customerBasket.Setup(x => x.GetCustomerBasket()).Returns(basketModel);
+            return new BasketManager(customerBasket.Object);
+        }
+
+        private IBasketManager SetupBasketWithProducts(BasketModel basketModel)
+        {
+            //initialize some basket entries
+            var shurikensProducts = new BasketEntryModel { Product = ProductAssets.exampleProductShuriken, Quantity = 3 };
+            var pogProducts = new BasketEntryModel { Product = ProductAssets.exampleProductBagOfPogs, Quantity = 2 };
+            
+            //mock basket model with products
+            basketModel.BasketContent = new List<BasketEntryModel> { pogProducts, shurikensProducts } ;
+
+            //mock BasketContainer service
+            Mock<IBasketContainer> customerBasket = new Mock<IBasketContainer>();
+            customerBasket.Setup(x => x.GetCustomerBasket()).Returns(basketModel);
             return new BasketManager(customerBasket.Object);
         }
     }
