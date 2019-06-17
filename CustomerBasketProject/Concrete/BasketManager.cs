@@ -61,14 +61,17 @@ namespace CustomerBasketProject.Concrete
         public BasketModel Remove(string productId, bool shouldRemoveAllItems)
         {
             var currentBasket = _basketContainer.GetCustomerBasket();
+            if(currentBasket.BasketContent.Count == 0)
+            {
+                return currentBasket;
+            }
+
             var existingItemInBasket = currentBasket.BasketContent.Find(x => x.Product.Id == productId);
             if(existingItemInBasket == null)
             {
                 throw new ArgumentException();
             }
-
             var updatedQuantity = existingItemInBasket.Quantity - 1;
-
             if(shouldRemoveAllItems || updatedQuantity == 0)
             {
                 currentBasket.BasketContent.Remove(existingItemInBasket);
@@ -80,7 +83,7 @@ namespace CustomerBasketProject.Concrete
             }
 
             currentBasket.SubBasketPrice = GetSubBasketPrice();
-            //apply discounts
+            //recheck discounts
             //calculate grand total price
             //currentBasket.GrandTotalPrice = GetGrandTotalPrice();
 
