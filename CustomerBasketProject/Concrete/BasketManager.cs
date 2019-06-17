@@ -108,14 +108,6 @@ namespace CustomerBasketProject.Concrete
             var currentBasket = _basketContainer.GetCustomerBasket();
             var res = currentBasket.BasketContent.Sum(x => x.SubTotal);
             return res;
-
-            //var subBasketPrice = 0.0m;
-            //foreach(var entry in currentBasket.BasketContent)
-            //{
-            //    subBasketPrice += entry.SubTotal;
-            //}
-
-            //return subBasketPrice;
         }
 
         public decimal GetGrandTotalPrice()

@@ -1,6 +1,7 @@
 ﻿using CustomerBasketProject.Abstract;
 using CustomerBasketProject.Concrete;
 using CustomerBasketProject.Models;
+using CustomerBasketProject.Resources;
 using CustomerBasketProject.Tests.Assets;
 using Moq;
 using NUnit.Framework;
@@ -122,6 +123,13 @@ namespace CustomerBasketProject.Tests.Tests
 
             var subBasketPrice = basketManager.GetSubBasketPrice();
             Assert.AreEqual(subBasketPrice, 0.0m);
+        }
+
+        public void Display_EmptyBasket()
+        {
+            IBasketManager basketManager = SetupEmptyBasket();
+            var basketRepresentation = basketManager.Display();
+            Assert.AreEqual(basketRepresentation, UserMessages.BasketIsEmptyMessage);
         }
 
         private IBasketManager SetupEmptyBasket()
