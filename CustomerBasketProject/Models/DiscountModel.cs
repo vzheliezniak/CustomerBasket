@@ -22,10 +22,12 @@ namespace CustomerBasketProject.Models
         public DiscountType Type { get; set; }
         public DiscountAction Action { get; set; }
         public string ProductId { get; set; }
+        public string Percent { get; set; }
         /// <summary>
         /// ???????
         /// </summary>
         public int Limitation { get; set; }
+        public bool ShouldExecuteForEachOccurence { get; set; }
         
     }
 }
